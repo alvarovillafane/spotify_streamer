@@ -25,3 +25,6 @@ proguard/
 
 # Log Files
 *.log
+
+#Spotify web api lib
+spotify-web-api-android/

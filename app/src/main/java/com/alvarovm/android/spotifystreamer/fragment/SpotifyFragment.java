@@ -2,9 +2,10 @@
  *  Copyright (C) 2015 AlvaroVM.com
  */
 
-package com.alvarovm.android.spotifystreamer;
+package com.alvarovm.android.spotifystreamer.fragment;
 
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.AsyncTask;
@@ -22,12 +23,20 @@ import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.Toast;
 
+import com.alvarovm.android.spotifystreamer.R;
+import com.alvarovm.android.spotifystreamer.activity.DetailActivity;
+import com.alvarovm.android.spotifystreamer.adapter.CustomAdapterSpotify;
+import com.alvarovm.android.spotifystreamer.model.MyArtist;
+import com.alvarovm.android.spotifystreamer.util.Helper;
+
 import java.util.ArrayList;
+import java.util.List;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Artist;
 import kaaes.spotify.webapi.android.models.ArtistsPager;
+import retrofit.RetrofitError;
 
 
 /**
@@ -36,7 +45,7 @@ import kaaes.spotify.webapi.android.models.ArtistsPager;
 public class SpotifyFragment extends Fragment {
 
     CustomAdapterSpotify customAdapterSpotify;
-    private String artistQuery =  null;
+    private ArrayList<MyArtist> myArtistListQuery;
 
 
     //Listener of the search query action.
@@ -68,17 +77,10 @@ public class SpotifyFragment extends Fragment {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putString("artistQuery",artistQuery);
         super.onSaveInstanceState(outState);
+        outState.putParcelableArrayList("myArtistListQuery", myArtistListQuery);
     }
 
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        if (savedInstanceState != null) {
-            updateArtists(savedInstanceState.getString("artistQuery"));
-        }
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -86,22 +88,30 @@ public class SpotifyFragment extends Fragment {
 
         View rootView = inflater.inflate(R.layout.fragment_spotify, container, false);
         ListView listViewArtists = (ListView) rootView.findViewById(R.id.list_artists);
+        List<MyArtist> listAdapter;
 
-        customAdapterSpotify =new CustomAdapterSpotify(
-                                     getActivity(),
-                                     new ArrayList<Artist>());
+        if(savedInstanceState == null || !savedInstanceState.containsKey("myArtistListQuery")) {
+            listAdapter = new ArrayList<MyArtist>();
+        } else {
+            listAdapter = savedInstanceState.getParcelableArrayList("myArtistListQuery");
+            myArtistListQuery = (ArrayList) listAdapter;
+        }
+
+        customAdapterSpotify = new CustomAdapterSpotify(
+                                         getActivity(),
+                                         listAdapter);
 
         listViewArtists.setAdapter(customAdapterSpotify);
 
         listViewArtists.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
-            public void onItemClick(AdapterView<?> parent, View view,int position, long id) {
-                Artist artist = customAdapterSpotify.getItem(position);
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                MyArtist artist = customAdapterSpotify.getItem(position);
                 Intent detailIntent = new Intent(getActivity(), DetailActivity.class)
-                                             .putExtra(Intent.EXTRA_TEXT, artist.id);
+                            .putExtra(Intent.EXTRA_TEXT, artist.getId());
                 startActivity(detailIntent);
-            }
+                }
         });
 
 
@@ -122,9 +132,13 @@ public class SpotifyFragment extends Fragment {
     }
 
     private void updateArtists(String artistName) {
-        FetchArtistsTask fetchArtistsTask = new FetchArtistsTask();
-        artistQuery = artistName;
-        fetchArtistsTask.execute(artistName);
+        Context context = getActivity().getApplicationContext();
+        if( Helper.isOnline(context) ){
+            FetchArtistsTask fetchArtistsTask = new FetchArtistsTask();
+            fetchArtistsTask.execute(artistName);
+        }else {
+            Toast.makeText(context, "No network connection available.", Toast.LENGTH_LONG).show();
+        }
     }
 
     /**
@@ -153,9 +167,11 @@ public class SpotifyFragment extends Fragment {
 
                 return spotify.searchArtists(params[0]);
 
-            } catch (RuntimeException ex){
-
-                Log.e(LOG_TAG, "Error at retrieving data " + ex.getMessage());
+            } catch (RetrofitError ex) {
+                Log.e(LOG_TAG, "Error at retrieving Artist data " + ex.getMessage());
+                Toast.makeText(getActivity().getApplicationContext(),
+                        ex.getMessage(),
+                        Toast.LENGTH_SHORT).show();
             }
 
             return null;
@@ -163,11 +179,22 @@ public class SpotifyFragment extends Fragment {
 
         @Override
         protected void onPostExecute(ArtistsPager artistsPager) {
+           myArtistListQuery = new ArrayList<MyArtist>();
+           customAdapterSpotify.clear();
 
            if(artistsPager != null && !artistsPager.artists.items.isEmpty()) {
-               customAdapterSpotify.clear();
+
                for (Artist artist : artistsPager.artists.items) {
-                   customAdapterSpotify.add(artist);
+                   MyArtist myArtist;
+                   if( artist.images.isEmpty() ) {
+                       myArtist = new MyArtist(artist.name, artist.id);
+                   } else {
+                       myArtist = new MyArtist(artist.name, artist.images.get(0).url, artist.id);
+                   }
+                   //List to save for recovering when resume application
+                   myArtistListQuery.add(myArtist);
+                   //Add to ArrayAdapter
+                   customAdapterSpotify.add(myArtist);
                }
            }else{
                Toast toast = Toast.makeText(getActivity(),res.getString(R.string.no_artist_found), Toast.LENGTH_LONG);

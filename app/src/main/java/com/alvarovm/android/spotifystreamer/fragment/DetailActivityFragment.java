@@ -2,8 +2,9 @@
  *  Copyright (C) 2015 AlvaroVM.com
  */
 
-package com.alvarovm.android.spotifystreamer;
+package com.alvarovm.android.spotifystreamer.fragment;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.AsyncTask;
@@ -17,13 +18,20 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.alvarovm.android.spotifystreamer.R;
+import com.alvarovm.android.spotifystreamer.adapter.CustomAdapterTopTracks;
+import com.alvarovm.android.spotifystreamer.model.MyTopTrack;
+import com.alvarovm.android.spotifystreamer.util.Helper;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Track;
 import kaaes.spotify.webapi.android.models.Tracks;
+import retrofit.RetrofitError;
 
 
 /**
@@ -33,6 +41,9 @@ public class DetailActivityFragment extends Fragment {
 
     private final String LOG_TAG = DetailActivityFragment.class.getSimpleName();
     private CustomAdapterTopTracks customAdapterTopTracks;
+    private ArrayList<MyTopTrack> myTopTrackListQuery;
+    private final int IMAGE_SIZE_LARGE = 0;
+    private final int IMAGE_SIZE_SMALL = 2;
 
     public DetailActivityFragment() {
     }
@@ -43,11 +54,20 @@ public class DetailActivityFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
 
         ListView listViewTopTracks = (ListView) rootView.findViewById(R.id.listview_toptracks);
+        List<MyTopTrack> listAdapter;
+
+        if(savedInstanceState == null || !savedInstanceState.containsKey("myTopTrackListQuery")) {
+            listAdapter = new ArrayList<MyTopTrack>();
+        } else {
+            listAdapter = savedInstanceState.getParcelableArrayList("myTopTrackListQuery");
+            myTopTrackListQuery = (ArrayList) listAdapter;
+        }
+
 
         //Initialization of Custom Track ArrayAdapter
         customAdapterTopTracks = new CustomAdapterTopTracks(
                                      getActivity(),
-                                     new ArrayList<Track>());
+                                     listAdapter);
 
         listViewTopTracks.setAdapter(customAdapterTopTracks);
 
@@ -55,8 +75,8 @@ public class DetailActivityFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
-                Track track = customAdapterTopTracks.getItem(position);
-                Toast.makeText(getActivity().getApplicationContext(), track.name, Toast.LENGTH_SHORT).show();
+                MyTopTrack myTopTrack = customAdapterTopTracks.getItem(position);
+                Toast.makeText(getActivity().getApplicationContext(), myTopTrack.getTrackName(), Toast.LENGTH_SHORT).show();
 
             }
         });
@@ -78,8 +98,16 @@ public class DetailActivityFragment extends Fragment {
     }
 
     private void updateTopTracks(String id) {
-        FetchTopTracks fetchTopTracks = new FetchTopTracks();
-        fetchTopTracks.execute(id);
+        Context context = getActivity().getApplicationContext();
+
+        if( Helper.isOnline(context) ){
+            FetchTopTracks fetchTopTracks = new FetchTopTracks();
+            fetchTopTracks.execute(id);
+        }else {
+            Toast.makeText(context, "No network connection available.", Toast.LENGTH_LONG).show();
+        }
+
+
     }
 
     private class FetchTopTracks extends AsyncTask<String, Void, Tracks> {
@@ -100,8 +128,11 @@ public class DetailActivityFragment extends Fragment {
 
                 return spotify.getArtistTopTrack(params[0],countryMap);
 
-            } catch (RuntimeException ex) {
+            } catch (RetrofitError ex) {
                 Log.e(LOG_TAG, "Error at retrieving top tracks data " + ex.getMessage());
+                Toast.makeText(getActivity().getApplicationContext(),
+                        ex.getMessage(),
+                        Toast.LENGTH_SHORT).show();
             }
 
             return null;
@@ -113,11 +144,31 @@ public class DetailActivityFragment extends Fragment {
          */
         @Override
         protected void onPostExecute(Tracks listTracks) {
+            customAdapterTopTracks.clear();
+            MyTopTrack myTopTrack;
 
             if(listTracks != null && !listTracks.tracks.isEmpty()) {
-                customAdapterTopTracks.clear();
-                for (Track track : listTracks.tracks) {
-                    customAdapterTopTracks.add(track);
+                myTopTrackListQuery = new ArrayList<MyTopTrack>();
+
+               for (Track track : listTracks.tracks) {
+                   if(!track.album.images.isEmpty()) {
+                       myTopTrack = new MyTopTrack(track.name,
+                               track.album.name,
+                               track.album.images.get(IMAGE_SIZE_LARGE).url,
+                               track.album.images.get(IMAGE_SIZE_SMALL).url,
+                               track.preview_url);
+                   }else {
+                       myTopTrack = new MyTopTrack(track.name,
+                               track.album.name,
+                               null,
+                               null,
+                               track.preview_url);
+                   }
+
+                        //Add in list to saveOnInstance
+                    myTopTrackListQuery.add(myTopTrack);
+                   //add To adapter
+                    customAdapterTopTracks.add(myTopTrack);
                 }
             }else {
                 Toast.makeText(getActivity().getApplicationContext(),

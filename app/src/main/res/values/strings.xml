@@ -7,4 +7,6 @@
     <string name="country_code">US</string>
     <string name="no_top_tracks">No top tracks available</string>
     <string name="no_artist_found">No Artist Found, please try again.</string>
+    <string name="myTopTrackListQuery">myTopTrackListQuery</string>
+    <string name="myArtistListQuery">myArtistListQuery</string>
 </resources>

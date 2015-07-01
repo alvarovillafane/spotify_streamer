@@ -2,12 +2,14 @@
  *  Copyright (C) 2015 AlvaroVM.com
  */
 
-package com.alvarovm.android.spotifystreamer;
+package com.alvarovm.android.spotifystreamer.activity;
 
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import com.alvarovm.android.spotifystreamer.R;
 
 
 public class DetailActivity extends ActionBarActivity {

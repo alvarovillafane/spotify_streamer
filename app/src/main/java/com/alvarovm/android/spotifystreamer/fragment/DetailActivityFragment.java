@@ -29,6 +29,7 @@ import java.util.List;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
+import kaaes.spotify.webapi.android.models.Image;
 import kaaes.spotify.webapi.android.models.Track;
 import kaaes.spotify.webapi.android.models.Tracks;
 import retrofit.RetrofitError;
@@ -42,8 +43,7 @@ public class DetailActivityFragment extends Fragment {
     private final String LOG_TAG = DetailActivityFragment.class.getSimpleName();
     private CustomAdapterTopTracks customAdapterTopTracks;
     private ArrayList<MyTopTrack> myTopTrackListQuery;
-    private final int IMAGE_SIZE_LARGE = 0;
-    private final int IMAGE_SIZE_SMALL = 2;
+    private final int FIRST_LIST_ITEM = 0;
 
     public DetailActivityFragment() {
     }
@@ -110,6 +110,17 @@ public class DetailActivityFragment extends Fragment {
 
     }
 
+    private String getArtistNameFromTrack(Track track){
+
+       if(!track.artists.isEmpty()){
+           return track.artists.get(FIRST_LIST_ITEM).name;
+       }
+        return null;
+
+    }
+
+
+
     private class FetchTopTracks extends AsyncTask<String, Void, Tracks> {
         Resources res = getActivity().getResources();
 
@@ -151,21 +162,26 @@ public class DetailActivityFragment extends Fragment {
                 myTopTrackListQuery = new ArrayList<MyTopTrack>();
 
                for (Track track : listTracks.tracks) {
-                   if(!track.album.images.isEmpty()) {
+                   List<Image> listImages = track.album.images;
+                   String artistName = getArtistNameFromTrack(track);
+
+                   if(!listImages.isEmpty()) {
                        myTopTrack = new MyTopTrack(track.name,
                                track.album.name,
-                               track.album.images.get(IMAGE_SIZE_LARGE).url,
-                               track.album.images.get(IMAGE_SIZE_SMALL).url,
-                               track.preview_url);
+                               listImages.get(FIRST_LIST_ITEM).url,
+                               listImages.get( listImages.size()-1 ).url,
+                               track.preview_url,
+                               artistName);
                    }else {
                        myTopTrack = new MyTopTrack(track.name,
                                track.album.name,
                                null,
                                null,
-                               track.preview_url);
+                               track.preview_url,
+                               artistName);
                    }
 
-                        //Add in list to saveOnInstance
+                   //Add in list to saveOnInstance
                     myTopTrackListQuery.add(myTopTrack);
                    //add To adapter
                     customAdapterTopTracks.add(myTopTrack);
@@ -179,5 +195,7 @@ public class DetailActivityFragment extends Fragment {
 
 
     }
+
+
 
 }

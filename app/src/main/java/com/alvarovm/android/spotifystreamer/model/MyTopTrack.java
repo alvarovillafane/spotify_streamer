@@ -1,11 +1,12 @@
+/**
+ *  Copyright (C) 2015 AlvaroVM.com
+ */
+
 package com.alvarovm.android.spotifystreamer.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
-/**
- * Created by root on 1/07/15.
- */
 public class MyTopTrack implements Parcelable {
 
     String trackName;
@@ -13,13 +14,15 @@ public class MyTopTrack implements Parcelable {
     String urlImageLarge;
     String urlImageSmall;
     String previewUrl;
+    String artistName;
 
-    public MyTopTrack(String trackName, String albumName, String urlImageLarge, String urlImageSmall, String previewUrl) {
+    public MyTopTrack(String trackName, String albumName, String urlImageLarge, String urlImageSmall, String previewUrl, String artistName) {
         this.trackName = trackName;
         this.albumName = albumName;
         this.urlImageLarge = urlImageLarge;
         this.urlImageSmall = urlImageSmall;
         this.previewUrl = previewUrl;
+        this.artistName = artistName;
     }
 
     public String getTrackName() {
@@ -62,6 +65,14 @@ public class MyTopTrack implements Parcelable {
         this.previewUrl = previewUrl;
     }
 
+    public String getArtistName() {
+        return artistName;
+    }
+
+    public void setArtistName(String artistName) {
+        this.artistName = artistName;
+    }
+
 
     @Override
     public int describeContents() {
@@ -75,6 +86,7 @@ public class MyTopTrack implements Parcelable {
         dest.writeString(this.urlImageLarge);
         dest.writeString(this.urlImageSmall);
         dest.writeString(this.previewUrl);
+        dest.writeString(this.artistName);
     }
 
     protected MyTopTrack(Parcel in) {
@@ -83,9 +95,10 @@ public class MyTopTrack implements Parcelable {
         this.urlImageLarge = in.readString();
         this.urlImageSmall = in.readString();
         this.previewUrl = in.readString();
+        this.artistName = in.readString();
     }
 
-    public static final Parcelable.Creator<MyTopTrack> CREATOR = new Parcelable.Creator<MyTopTrack>() {
+    public static final Creator<MyTopTrack> CREATOR = new Creator<MyTopTrack>() {
         public MyTopTrack createFromParcel(Parcel source) {
             return new MyTopTrack(source);
         }

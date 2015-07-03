@@ -1,11 +1,13 @@
+/**
+ *  Copyright (C) 2015 AlvaroVM.com
+ */
+
 package com.alvarovm.android.spotifystreamer.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
-/**
- * Created by AlvaroVM.com
- */
+
 public class MyArtist implements Parcelable{
     private final String nameArtist;
     private final String  urlImageArtist;

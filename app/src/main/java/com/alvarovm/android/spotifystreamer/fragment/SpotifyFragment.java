@@ -185,7 +185,7 @@ public class SpotifyFragment extends Fragment {
            if(artistsPager != null && !artistsPager.artists.items.isEmpty()) {
                MyArtist myArtist;
                for (Artist artist : artistsPager.artists.items) {
-                   
+
                    if( artist.images.isEmpty() ) {
                        myArtist = new MyArtist(artist.name, artist.id);
                    } else {

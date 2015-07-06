@@ -65,10 +65,10 @@ public class CustomAdapterSpotify extends ArrayAdapter<MyArtist> {
         if ( Helper.isValidURL(urlImage) ) {
             Picasso.with(context)
                     .load(urlImage)
-                    .resize(IMAGE_WIDTH, IMAGE_HEIGHT)
-                    .centerCrop()
                     .placeholder(R.drawable.placeholder_image)
                     .error(R.drawable.placeholder_image)
+                    .resize(IMAGE_WIDTH, IMAGE_HEIGHT)
+                    .centerCrop()
                     .into(viewHolder.imageView);
         }else{
             viewHolder.imageView.setImageDrawable(context.getResources()

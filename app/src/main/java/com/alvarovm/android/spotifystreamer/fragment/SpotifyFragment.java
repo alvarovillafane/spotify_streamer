@@ -64,10 +64,6 @@ public class SpotifyFragment extends Fragment {
     };
 
 
-    public SpotifyFragment() {
-    }
-
-
     @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);

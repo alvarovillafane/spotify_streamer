@@ -24,4 +24,8 @@ public class Helper {
         return netInfo != null && netInfo.isConnectedOrConnecting();
     }
 
+
+    public static int millisecondsToSeconds(int millis){
+        return millis/1000;
+    }
 }

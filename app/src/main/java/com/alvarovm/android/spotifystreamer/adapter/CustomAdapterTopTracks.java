@@ -70,7 +70,6 @@ public class CustomAdapterTopTracks extends ArrayAdapter<MyTopTrack> {
 
             Picasso.with(context)
                     .load(urlImage)
-                    .resize(IMAGE_WIDTH, IMAGE_HEIGHT).centerCrop()
                     .placeholder(R.drawable.placeholder_image)
                     .error(R.drawable.placeholder_image)
                     .into(viewHolder.imageAlbum);

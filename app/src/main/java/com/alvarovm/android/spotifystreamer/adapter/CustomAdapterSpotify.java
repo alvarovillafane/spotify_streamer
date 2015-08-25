@@ -67,8 +67,6 @@ public class CustomAdapterSpotify extends ArrayAdapter<MyArtist> {
                     .load(urlImage)
                     .placeholder(R.drawable.placeholder_image)
                     .error(R.drawable.placeholder_image)
-                    .resize(IMAGE_WIDTH, IMAGE_HEIGHT)
-                    .centerCrop()
                     .into(viewHolder.imageView);
         }else{
             viewHolder.imageView.setImageDrawable(context.getResources()

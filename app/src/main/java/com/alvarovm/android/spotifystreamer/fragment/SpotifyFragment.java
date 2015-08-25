@@ -6,7 +6,6 @@ package com.alvarovm.android.spotifystreamer.fragment;
 
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -24,7 +23,6 @@ import android.widget.SearchView;
 import android.widget.Toast;
 
 import com.alvarovm.android.spotifystreamer.R;
-import com.alvarovm.android.spotifystreamer.activity.DetailActivity;
 import com.alvarovm.android.spotifystreamer.adapter.CustomAdapterSpotify;
 import com.alvarovm.android.spotifystreamer.model.MyArtist;
 import com.alvarovm.android.spotifystreamer.util.Helper;
@@ -46,6 +44,7 @@ public class SpotifyFragment extends Fragment {
 
     CustomAdapterSpotify customAdapterSpotify;
     private ArrayList<MyArtist> myArtistListQuery;
+    SearchView searchView;
 
 
     //Listener of the search query action.
@@ -59,9 +58,15 @@ public class SpotifyFragment extends Fragment {
         @Override
         public boolean onQueryTextSubmit(String query) {
             updateArtists(query);
+            searchView.clearFocus();
             return true;
         }
     };
+
+    public interface Callback {
+
+        public void onItemSelected(String artistId);
+    }
 
 
     @Override
@@ -103,10 +108,8 @@ public class SpotifyFragment extends Fragment {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                MyArtist artist = customAdapterSpotify.getItem(position);
-                Intent detailIntent = new Intent(getActivity(), DetailActivity.class)
-                            .putExtra(Intent.EXTRA_TEXT, artist.getId());
-                startActivity(detailIntent);
+                 MyArtist artist = customAdapterSpotify.getItem(position);
+                ( (Callback) getActivity() ).onItemSelected(artist.getId());
                 }
         });
 
@@ -122,9 +125,15 @@ public class SpotifyFragment extends Fragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        SearchView searchView = (SearchView)menu.findItem(R.id.menu_search).getActionView();
+        searchView = (SearchView)menu.findItem(R.id.menu_search).getActionView();
         searchView.setIconifiedByDefault(true);
         searchView.setOnQueryTextListener(queryListener);
+    }
+
+
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
     }
 
     private void updateArtists(String artistName) {

@@ -13,6 +13,9 @@ public class MyArtist implements Parcelable{
     private final String  urlImageArtist;
     private final String id;
 
+    public static final String ID = "ID_ARTIST";
+
+
     public MyArtist(String nameArtist, String urlImageArtist, String id) {
         this.nameArtist = nameArtist;
         this.urlImageArtist = urlImageArtist;

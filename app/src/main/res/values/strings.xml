@@ -9,4 +9,6 @@
     <string name="no_artist_found">No Artist Found, please try again.</string>
     <string name="myTopTrackListQuery">myTopTrackListQuery</string>
     <string name="myArtistListQuery">myArtistListQuery</string>
+    <string name="title_activity_player">Spotify Streamer Player</string>
+    <string name="song_preparing">Loading...</string>
 </resources>

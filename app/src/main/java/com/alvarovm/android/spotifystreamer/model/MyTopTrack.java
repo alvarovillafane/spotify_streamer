@@ -9,6 +9,9 @@ import android.os.Parcelable;
 
 public class MyTopTrack implements Parcelable {
 
+    public static String MY_TOP_TRACK_POSITION = "myTopTrackPosition";
+    public static String MY_TOP_TRACK_LIST = "myTopTrackList";
+
     String trackName;
     String albumName;
     String urlImageLarge;

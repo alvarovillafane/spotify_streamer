@@ -5,7 +5,6 @@
 package com.alvarovm.android.spotifystreamer.fragment;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -20,6 +19,7 @@ import android.widget.Toast;
 
 import com.alvarovm.android.spotifystreamer.R;
 import com.alvarovm.android.spotifystreamer.adapter.CustomAdapterTopTracks;
+import com.alvarovm.android.spotifystreamer.model.MyArtist;
 import com.alvarovm.android.spotifystreamer.model.MyTopTrack;
 import com.alvarovm.android.spotifystreamer.util.Helper;
 
@@ -42,11 +42,20 @@ public class DetailActivityFragment extends Fragment {
 
     private final String LOG_TAG = DetailActivityFragment.class.getSimpleName();
     private CustomAdapterTopTracks customAdapterTopTracks;
-    private ArrayList<MyTopTrack> myTopTrackListQuery;
+    private ArrayList<MyTopTrack> myTopTrackListQuery;;
+    public static final String TOP_TRACK_LIST = "TOP_TRACK_LIST";
+    public static final String TRACK_POSITION = "TRACK_POSITION";
+
     private final int FIRST_LIST_ITEM = 0;
 
     public DetailActivityFragment() {
     }
+
+    public interface Callback {
+        public void onItemSelected(ArrayList topTrackList,
+                                   int pos);
+    }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -55,6 +64,10 @@ public class DetailActivityFragment extends Fragment {
 
         ListView listViewTopTracks = (ListView) rootView.findViewById(R.id.listview_toptracks);
         List<MyTopTrack> listAdapter;
+
+        /**
+         * To do:Change saveinstance check to onCreate method
+         */
 
         if(savedInstanceState == null || !savedInstanceState.containsKey("myTopTrackListQuery")) {
             listAdapter = new ArrayList<MyTopTrack>();
@@ -76,7 +89,7 @@ public class DetailActivityFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
                 MyTopTrack myTopTrack = customAdapterTopTracks.getItem(position);
-                Toast.makeText(getActivity().getApplicationContext(), myTopTrack.getTrackName(), Toast.LENGTH_SHORT).show();
+                ((Callback) getActivity()).onItemSelected(myTopTrackListQuery,position);
 
             }
         });
@@ -90,12 +103,20 @@ public class DetailActivityFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        Intent intentMain = getActivity().getIntent();
-        if (intentMain != null && intentMain.hasExtra(Intent.EXTRA_TEXT)) {
-            String id= intentMain.getStringExtra(Intent.EXTRA_TEXT);
-            updateTopTracks(id);
+        Bundle arguments = getArguments();
+        String id = null;
+        if (arguments != null) {
+            id = arguments.getString(MyArtist.ID);
+            if(id != null) { updateTopTracks(id); }
         }
+
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+    }
+
 
     private void updateTopTracks(String id) {
         Context context = getActivity().getApplicationContext();

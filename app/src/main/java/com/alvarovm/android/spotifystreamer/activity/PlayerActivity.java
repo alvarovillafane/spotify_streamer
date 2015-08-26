@@ -40,8 +40,8 @@ public class PlayerActivity extends ActionBarActivity {
 
             getSupportFragmentManager().beginTransaction()
                     .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                    .add(android.R.id.content, playerFragment)
-                    .addToBackStack(null).commit();
+                    .add(android.R.id.content, playerFragment).commit();
+                    //.addToBackStack(null).commit();
         }
     }
 
